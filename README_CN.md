@@ -7,6 +7,19 @@ English | [中文](README_CN.md)
 [![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
+## 适合谁用
+
+用飞书多维表格管理文章链接的团队——文章库、内容日历、资料汇总——需要把这些链接（以及链接背后的内容）从飞书里取出来。
+
+**典型场景：**
+- **搭建本地知识库** — 把飞书表格里的几百篇文章下载为 Markdown，导入 LLM 或 RAG 管道
+- **内容备份** — 文章消失或设为私密之前，批量存到本地
+- **平台迁移** — 一次性提取所有链接和内容，不用逐篇手动打开
+- **内容运营** — 团队在多 Sheet 的飞书表格里记录文章 URL，需要完整导出，不只是第一个标签页
+
+**其他方案的问题：**
+飞书侧边栏显示着所有 Sheet，但数据只有在你点击对应标签页时才会加载。抓 HTML、跑爬虫、调 API——你只能拿到第一个 Sheet，其余的根本不存在。
+
 ## 为什么不直接爬取？
 
 飞书多维表格的每个 Sheet 只有在浏览器中被激活后才会加载数据模型。任何常规爬虫只能看到第一个 Sheet——其余的在 HTML 里根本不存在。
@@ -74,6 +87,8 @@ npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--
 | `-o <dir>` | `./feishu-articles` | 输出目录 |
 | `-c <n>` | `5` | 并发下载数 |
 | `--max-wait <ms>` | `20000` | 每个 URL 的最长等待时间 |
+
+**并发下载：** 默认 5 个并发，几百篇文章几分钟搞定。
 
 **断点续传：** 每成功下载一个 URL 后保存进度。随时可以中断，重新运行自动跳过已下载的文件。
 

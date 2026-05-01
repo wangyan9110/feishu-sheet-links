@@ -7,6 +7,19 @@ Extract all hyperlinks from a public Feishu spreadsheet — **every sheet tab, n
 [![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
+## Who Is This For
+
+Teams that use Feishu spreadsheets as a link index — article libraries, content calendars, research collections — and need to get those links (and the content behind them) out of Feishu.
+
+**Common use cases:**
+- **Build a local knowledge base** — download hundreds of Feishu-linked articles as Markdown, then feed them to an LLM or RAG pipeline
+- **Backup content** — archive articles to disk before they disappear or go behind a paywall
+- **Migrate to another platform** — extract all links and content in one pass instead of opening each one manually
+- **Content operations** — your team tracks article URLs in a multi-sheet Feishu table; you need the full list, not just the first tab
+
+**The problem with every other approach:**
+Feishu shows all your sheets in the sidebar, but the data only loads when you click each tab. Copy the page HTML, run a scraper, call the API — you get one sheet. The rest are invisible.
+
 ## Why Not Just Scrape It Yourself?
 
 Feishu spreadsheets lazy-load each sheet's data model only when that tab is activated in a real browser. Any standard scraper only sees the first sheet — the rest simply don't exist in the HTML.
@@ -74,6 +87,8 @@ npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--
 | `-o <dir>` | `./feishu-articles` | Output directory |
 | `-c <n>` | `5` | Concurrent downloads |
 | `--max-wait <ms>` | `20000` | Per-URL timeout |
+
+**Concurrent downloads:** 5 parallel workers by default — hundreds of articles done in minutes.
 
 **Resume support:** progress is saved after each successful download. Kill it anytime — re-running picks up where it left off.
 
