@@ -2,46 +2,32 @@
 
 # feishu-sheet-links
 
-Extract all hyperlinks from a public Feishu spreadsheet — **every sheet tab, not just the first** — and batch-download the linked articles as Markdown files.
+Stop opening Feishu tabs one by one. Extract every link from every sheet — then download all the articles as Markdown in minutes.
 
 [![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
+## The Problem
+
+Feishu spreadsheets show all your sheets in the sidebar, but each sheet's data only loads when you click the tab. Copy the HTML, run a scraper, call the API — you get one sheet. The rest are invisible.
+
+feishu-sheet-links uses **Chrome DevTools Protocol (CDP)** to activate every sheet programmatically, wait for the data to load, and extract links from both Feishu storage formats (`url-type` and `mention-type`).
+
+**No npm install.** Just Bun and Chrome.
+
 ## Who Is This For
 
-Teams that use Feishu spreadsheets as a link index — article libraries, content calendars, research collections — and need to get those links (and the content behind them) out of Feishu.
+Anyone who uses a Feishu spreadsheet as a link index — article libraries, content calendars, research collections — and needs to get those links out.
 
-**Common use cases:**
-- **Build a local knowledge base** — download hundreds of Feishu-linked articles as Markdown, then feed them to an LLM or RAG pipeline
-- **Backup content** — archive articles to disk before they disappear or go behind a paywall
-- **Migrate to another platform** — extract all links and content in one pass instead of opening each one manually
-- **Content operations** — your team tracks article URLs in a multi-sheet Feishu table; you need the full list, not just the first tab
-
-**The problem with every other approach:**
-Feishu shows all your sheets in the sidebar, but the data only loads when you click each tab. Copy the page HTML, run a scraper, call the API — you get one sheet. The rest are invisible.
-
-## Why Not Just Scrape It Yourself?
-
-Feishu spreadsheets lazy-load each sheet's data model only when that tab is activated in a real browser. Any standard scraper only sees the first sheet — the rest simply don't exist in the HTML.
-
-feishu-sheet-links uses **Chrome DevTools Protocol (CDP)** to activate each sheet programmatically and wait for its internal JavaScript model to populate, then extracts links from both Feishu storage formats (`url-type` and `mention-type`).
-
-**No npm install.** Drop in Bun and Chrome and you're done.
+- **Build a local knowledge base** — download hundreds of articles as Markdown, feed to an LLM or RAG pipeline
+- **Backup content** — archive before articles disappear or go private
+- **Migrate to another platform** — extract everything in one pass
+- **Content operations** — full export across all sheets, not just the first tab
 
 ## Requirements
 
 - [Bun](https://bun.sh) runtime
 - Google Chrome or Chromium
-
-## Quick Start
-
-```bash
-# Step 1 — extract links from all sheets
-npx -y bun scripts/main.ts "https://your-org.feishu.cn/wiki/..." -o links.json
-
-# Step 2 — batch download as Markdown
-npx -y bun scripts/download.ts links.json -o ./articles
-```
 
 ## Installation
 
@@ -60,6 +46,28 @@ npx skills add wangyan9110/feishu-sheet-links
 git clone https://github.com/wangyan9110/feishu-sheet-links
 ```
 
+## Quick Start
+
+```bash
+# Step 1 — extract links from all sheets
+npx -y bun scripts/main.ts "https://your-org.feishu.cn/wiki/..." -o links.json
+
+# Step 2 — batch download as Markdown
+npx -y bun scripts/download.ts links.json -o ./articles
+```
+
+Example output after Step 1:
+
+```
+Found 4 sheets, 127 links total:
+  1月: 32 links
+  2月: 28 links
+  3月: 35 links
+  4月: 32 links
+
+Saved to: links.json
+```
+
 ## Usage
 
 ### Step 1 — Extract links
@@ -68,7 +76,7 @@ git clone https://github.com/wangyan9110/feishu-sheet-links
 npx -y bun scripts/main.ts <spreadsheet-url> [-o output.json]
 ```
 
-Output:
+Output format:
 ```json
 {
   "Sheet1": [{ "text": "Article Title", "url": "https://..." }],
@@ -88,18 +96,9 @@ npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--
 | `-c <n>` | `5` | Concurrent downloads |
 | `--max-wait <ms>` | `20000` | Per-URL timeout |
 
-**Concurrent downloads:** 5 parallel workers by default — hundreds of articles done in minutes.
+**5 parallel workers by default** — hundreds of articles done in minutes.
 
-**Resume support:** progress is saved after each successful download. Kill it anytime — re-running picks up where it left off.
-
-## How It Works
-
-1. Connects to an existing Chrome instance (ports 64023, 9222, 9229) or launches its own
-2. Reads all sheet IDs from `spreadApp.collaborativeSpread._spread.sheetIdToIndexMap`
-3. For each sheet, opens a tab at `?sheet=<id>`, calls `setActiveSheetIndex()` to trigger lazy loading, waits for `sheet._dataModel.contentModel`
-4. Extracts links from both storage formats:
-   - **url-type:** `contentModel.link.idToRef._map` — whole-cell hyperlinks
-   - **mention-type:** `contentModel.segmentModel.table` — inline rich-text links
+**Resume support:** progress is saved after each download. Kill it anytime — re-running skips already-downloaded files.
 
 ## Environment Variables
 
@@ -113,6 +112,15 @@ npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--
 - Works with **public** Feishu documents only (no login required)
 - Each sheet tab takes 8–15 seconds to load
 - Chrome profile is isolated from your system profile: `~/Library/Application Support/feishu-sheet-links/chrome-profile` (macOS)
+
+## How It Works
+
+1. Connects to an existing Chrome instance (ports 64023, 9222, 9229) or launches its own
+2. Reads all sheet IDs from `spreadApp.collaborativeSpread._spread.sheetIdToIndexMap`
+3. For each sheet, opens a tab at `?sheet=<id>`, calls `setActiveSheetIndex()` to trigger lazy loading, waits for `sheet._dataModel.contentModel`
+4. Extracts links from both storage formats:
+   - **url-type:** `contentModel.link.idToRef._map` — whole-cell hyperlinks
+   - **mention-type:** `contentModel.segmentModel.table` — inline rich-text links
 
 ## License
 
