@@ -1,3 +1,8 @@
+---
+name: feishu-sheet-links
+description: Extract all hyperlinks from a public Feishu spreadsheet across all sheet tabs, and optionally batch-download the linked articles as Markdown files. Use when user provides a Feishu spreadsheet URL and wants to extract or download its links.
+---
+
 # feishu-sheet-links
 
 Extract all hyperlinks from a public Feishu spreadsheet across all sheet tabs.
