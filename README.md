@@ -2,64 +2,64 @@
 
 # feishu-sheet-links
 
-Extract all hyperlinks from a public Feishu spreadsheet — across **all sheet tabs** — and optionally batch-download the linked articles as Markdown files.
+> A Claude Code skill that extracts all hyperlinks from a public Feishu spreadsheet — across **all sheet tabs** — and optionally batch-downloads the linked articles as Markdown files.
+
+[![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
+[![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
 ## Why This Exists
 
-Feishu spreadsheets lazy-load each sheet's data model only when that tab is activated in the browser. Standard scraping approaches miss every sheet except the first one. This tool uses Chrome DevTools Protocol (CDP) to programmatically activate each sheet, wait for its internal JavaScript model to populate, then extract links from two different Feishu storage formats (`url-type` and `mention-type`).
+Feishu spreadsheets lazy-load each sheet's data model only when that tab is activated in the browser. Standard scraping approaches miss every sheet except the first one.
+
+This tool uses **Chrome DevTools Protocol (CDP)** to programmatically activate each sheet, wait for its internal JavaScript model to populate, then extract links from two different Feishu storage formats (`url-type` and `mention-type`).
+
+**Zero npm dependencies.** No `npm install` needed — only Bun and Chrome.
 
 ## Requirements
 
 - [Bun](https://bun.sh) runtime
 - Google Chrome (or Chromium)
 
-**Zero npm dependencies.** No `npm install` needed — only Bun and Chrome.
+## Installation
 
-## Use as a Claude Code Skill
-
-Copy the entire repo into your Claude Code skills directory:
-
+**Via ClawHub** (recommended):
 ```bash
+clawhub install feishu-sheet-links
+```
+
+**Via npx skills:**
+```bash
+npx skills add wangyan9110/feishu-sheet-links
+```
+
+**Manual:**
+```bash
+git clone https://github.com/wangyan9110/feishu-sheet-links
 cp -r feishu-sheet-links ~/.claude/skills/
 ```
 
-Then invoke it in Claude Code:
+## Usage in Claude Code
+
+Once installed, invoke the skill in Claude Code:
 
 ```
-/feishu-sheet-links https://your-feishu-doc.feishu.cn/wiki/...
+/feishu-sheet-links https://your-org.feishu.cn/wiki/...
 ```
 
-See [SKILL.md](SKILL.md) for the full skill interface.
+Claude will:
+1. Extract all hyperlinks from every sheet tab
+2. Show a summary (sheet names + link counts)
+3. Offer to batch-download the linked articles as Markdown
 
 ## Use as Standalone Scripts
 
 **Step 1 — Extract links from all sheets:**
 
 ```bash
-npx -y bun scripts/main.ts "https://your-feishu-doc.feishu.cn/wiki/..." -o links.json
+npx -y bun scripts/main.ts "https://your-org.feishu.cn/wiki/..." -o links.json
 ```
 
-**Step 2 — Batch download the linked articles as Markdown:**
-
-```bash
-npx -y bun scripts/download.ts links.json -o ./articles -c 5
-```
-
-## Usage
-
-### main.ts — Extract links
-
-```
-bun scripts/main.ts <spreadsheet-url> [-o output.json]
-```
-
-| Argument | Default | Description |
-|----------|---------|-------------|
-| `<spreadsheet-url>` | — | Public Feishu wiki or spreadsheet URL |
-| `-o <file>` | `feishu-sheet-links.json` | Output JSON path |
-
-**Output format:**
-
+Output format:
 ```json
 {
   "Sheet1": [{ "text": "Article Title", "url": "https://..." }],
@@ -67,10 +67,10 @@ bun scripts/main.ts <spreadsheet-url> [-o output.json]
 }
 ```
 
-### download.ts — Batch download articles
+**Step 2 — Batch download the linked articles as Markdown:**
 
-```
-bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wait ms]
+```bash
+npx -y bun scripts/download.ts links.json -o ./articles -c 5
 ```
 
 | Option | Default | Description |
@@ -83,7 +83,7 @@ bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wai
 
 ## How It Works
 
-1. Connects to an existing Chrome instance if one is already running (ports 64023, 9222, 9229), otherwise launches its own
+1. Connects to an existing Chrome instance if one is running (ports 64023, 9222, 9229), otherwise launches its own
 2. Opens the spreadsheet to discover all sheet IDs from `spreadApp.collaborativeSpread._spread.sheetIdToIndexMap`
 3. For each sheet, opens a dedicated tab at `?sheet=<id>`, calls `setActiveSheetIndex()` to trigger lazy loading, and waits for `sheet._dataModel.contentModel` to populate
 4. Extracts links from both storage formats:
@@ -105,4 +105,4 @@ bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wai
 
 ## License
 
-MIT
+[MIT-0](LICENSE) — No attribution required.

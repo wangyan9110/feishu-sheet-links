@@ -2,13 +2,16 @@ English | [中文](README_CN.md)
 
 # feishu-sheet-links
 
-从公开的飞书多维表格中提取所有超链接——覆盖**所有 Sheet 标签页**——并可批量下载链接指向的文章，转为 Markdown 文件。
+> 一个 Claude Code Skill，从公开的飞书多维表格中提取所有超链接——覆盖**所有 Sheet 标签页**——并可批量下载链接指向的文章，转为 Markdown 文件。
+
+[![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
+[![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
 ## 为什么做这个
 
 飞书多维表格采用懒加载机制：每个 Sheet 的数据模型只有在浏览器中被激活后才会加载。常规爬虫只能抓到第一个 Sheet 的数据，其余全部遗漏。
 
-这个工具通过 Chrome DevTools Protocol（CDP）逐一激活每个 Sheet，等待其内部 JavaScript 数据模型加载完成，再从飞书的两种链接存储格式（`url-type` 和 `mention-type`）中提取超链接。
+这个工具通过 **Chrome DevTools Protocol（CDP）** 逐一激活每个 Sheet，等待其内部 JavaScript 数据模型加载完成，再从飞书的两种链接存储格式（`url-type` 和 `mention-type`）中提取超链接。
 
 **零 npm 依赖。** 不需要 `npm install`，只依赖 Bun 运行时和 Chrome 浏览器。
 
@@ -17,51 +20,46 @@ English | [中文](README_CN.md)
 - [Bun](https://bun.sh) 运行时
 - Google Chrome 或 Chromium
 
-## 作为 Claude Code Skill 使用
+## 安装
 
-将整个仓库复制到 Claude Code 的 skills 目录：
-
+**通过 ClawHub**（推荐）：
 ```bash
+clawhub install feishu-sheet-links
+```
+
+**通过 npx skills：**
+```bash
+npx skills add wangyan9110/feishu-sheet-links
+```
+
+**手动安装：**
+```bash
+git clone https://github.com/wangyan9110/feishu-sheet-links
 cp -r feishu-sheet-links ~/.claude/skills/
 ```
 
-然后在 Claude Code 中调用：
+## 在 Claude Code 中使用
+
+安装后，在 Claude Code 中调用：
 
 ```
-/feishu-sheet-links https://your-feishu-doc.feishu.cn/wiki/...
+/feishu-sheet-links https://your-org.feishu.cn/wiki/...
 ```
 
-完整的 Skill 接口说明见 [SKILL.md](SKILL.md)。
+Claude 会自动：
+1. 提取所有 Sheet 标签页中的超链接
+2. 显示汇总（各 Sheet 名称 + 链接数量）
+3. 询问是否批量下载为 Markdown 文件
 
 ## 作为独立脚本使用
 
 **第一步 — 提取所有 Sheet 的链接：**
 
 ```bash
-npx -y bun scripts/main.ts "https://your-feishu-doc.feishu.cn/wiki/..." -o links.json
+npx -y bun scripts/main.ts "https://your-org.feishu.cn/wiki/..." -o links.json
 ```
 
-**第二步 — 批量下载链接文章为 Markdown：**
-
-```bash
-npx -y bun scripts/download.ts links.json -o ./articles -c 5
-```
-
-## 使用说明
-
-### main.ts — 提取链接
-
-```
-bun scripts/main.ts <spreadsheet-url> [-o output.json]
-```
-
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `<spreadsheet-url>` | — | 公开的飞书 wiki 或多维表格 URL |
-| `-o <file>` | `feishu-sheet-links.json` | 输出 JSON 文件路径 |
-
-**输出格式：**
-
+输出格式：
 ```json
 {
   "1月": [{ "text": "文章标题", "url": "https://..." }],
@@ -69,10 +67,10 @@ bun scripts/main.ts <spreadsheet-url> [-o output.json]
 }
 ```
 
-### download.ts — 批量下载文章
+**第二步 — 批量下载链接文章为 Markdown：**
 
-```
-bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wait ms]
+```bash
+npx -y bun scripts/download.ts links.json -o ./articles -c 5
 ```
 
 | 参数 | 默认值 | 说明 |
@@ -107,4 +105,4 @@ bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wai
 
 ## License
 
-MIT
+[MIT-0](LICENSE) — 无需署名。
