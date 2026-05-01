@@ -11,6 +11,8 @@ Feishu spreadsheets lazy-load each sheet's data model only when that tab is acti
 - [Bun](https://bun.sh) runtime
 - Google Chrome (or Chromium)
 
+**Zero npm dependencies.** No `npm install` needed — only Bun and Chrome.
+
 ## Quick Start
 
 **Step 1 — Extract links from all sheets:**
