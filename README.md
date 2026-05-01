@@ -1,64 +1,64 @@
-[中文](README_CN.md) | English
+[English](README_EN.md) | 中文
 
 # feishu-sheet-links
 
-Stop opening Feishu tabs one by one. Extract every link from every sheet — then download all the articles as Markdown in minutes.
+**飞书多维表格链接提取 & 批量下载工具。** 不用再一个一个点标签页——一次提取所有 Sheet 里的全部链接，几分钟内批量下载为 Markdown 文件。
 
 [![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
-## The Problem
+## 为什么飞书表格链接没法直接爬？
 
-Feishu spreadsheets show all your sheets in the sidebar, but each sheet's data only loads when you click the tab. Copy the HTML, run a scraper, call the API — you get one sheet. The rest are invisible.
+飞书多维表格的每个 Sheet 采用懒加载：数据只有在浏览器中点击对应标签页后才会加载。抓 HTML、跑爬虫、调飞书 API——你只能拿到第一个 Sheet，其余的根本不存在。
 
-feishu-sheet-links uses **Chrome DevTools Protocol (CDP)** to activate every sheet programmatically, wait for the data to load, and extract links from both Feishu storage formats (`url-type` and `mention-type`).
+feishu-sheet-links 使用 **Chrome DevTools Protocol（CDP）** 逐一激活每个 Sheet，等待数据加载完成，再从飞书的两种链接格式（`url-type` 和 `mention-type`）中提取全部超链接。
 
-**No npm install.** Just Bun and Chrome.
+**不需要 npm install。** 只要有 Bun 和 Chrome，直接运行。
 
-## Who Is This For
+## 适合谁用
 
-You paid for a knowledge subscription. The curator shared hundreds of article links in a Feishu spreadsheet. You want it all on your local machine.
+你购买了一个付费知识库，内容主把精华文章的链接整理在飞书表格里。你想把这些文章全部下载到本地，做成自己的知识库。
 
-More broadly: if someone is using a Feishu spreadsheet to store links — any links, any structure — this tool downloads them all, across every sheet tab.
+更广泛地说：只要有人用飞书表格存链接——无论什么结构——这个工具就能帮你把所有 Sheet 里的链接全部提取并批量下载。
 
-- **Archive a paid knowledge base** — download everything before your subscription expires or articles go private
-- **Build a local knowledge base** — pull articles as Markdown, feed to an LLM or RAG pipeline
-- **Migrate content** — extract everything in one pass instead of opening each link manually
-- **Back up research collections** — any Feishu spreadsheet used as a link library
+- **归档付费飞书知识库** — 在订阅到期或文章设为私密前，把内容全部存到本地
+- **搭建本地 AI 知识库** — 批量下载为 Markdown，导入 LLM 或 RAG 管道
+- **飞书文章批量导出** — 一次性提取全部链接，不用逐篇手动打开
+- **备份飞书资料合集** — 任何用飞书表格整理文章链接的场景
 
-## Requirements
+## 环境要求
 
-- [Bun](https://bun.sh) runtime
-- Google Chrome or Chromium
+- [Bun](https://bun.sh) 运行时
+- Google Chrome 或 Chromium
 
-## Installation
+## 安装
 
-**Via ClawHub:**
+**通过 ClawHub：**
 ```bash
 clawhub install feishu-sheet-links
 ```
 
-**Via npx skills:**
+**通过 npx skills：**
 ```bash
 npx skills add wangyan9110/feishu-sheet-links
 ```
 
-**Clone directly:**
+**直接克隆：**
 ```bash
 git clone https://github.com/wangyan9110/feishu-sheet-links
 ```
 
-## Quick Start
+## 快速开始
 
 ```bash
-# Step 1 — extract links from all sheets
+# 第一步 — 提取飞书表格所有 Sheet 的链接
 npx -y bun scripts/main.ts "https://your-org.feishu.cn/wiki/..." -o links.json
 
-# Step 2 — batch download as Markdown
+# 第二步 — 批量下载文章为 Markdown
 npx -y bun scripts/download.ts links.json -o ./articles
 ```
 
-Example output after Step 1:
+第一步执行后的示例输出：
 
 ```
 Found 4 sheets, 127 links total:
@@ -70,60 +70,64 @@ Found 4 sheets, 127 links total:
 Saved to: links.json
 ```
 
-## Usage
+## 使用方法
 
-### Step 1 — Extract links
+### 第一步 — 提取飞书表格链接
 
 ```bash
 npx -y bun scripts/main.ts <spreadsheet-url> [-o output.json]
 ```
 
-Output format:
+输出格式：
 ```json
 {
-  "Sheet1": [{ "text": "Article Title", "url": "https://..." }],
-  "Sheet2": [...]
+  "1月": [{ "text": "文章标题", "url": "https://..." }],
+  "2月": [...]
 }
 ```
 
-### Step 2 — Batch download articles
+### 第二步 — 批量下载飞书文章
 
 ```bash
 npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wait ms]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `-o <dir>` | `./feishu-articles` | Output directory |
-| `-c <n>` | `5` | Concurrent downloads |
-| `--max-wait <ms>` | `20000` | Per-URL timeout |
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `-o <dir>` | `./feishu-articles` | 输出目录 |
+| `-c <n>` | `5` | 并发下载数 |
+| `--max-wait <ms>` | `20000` | 每个 URL 最长等待时间 |
 
-**5 parallel workers by default** — hundreds of articles done in minutes.
+**默认 5 个并发**——几百篇文章几分钟搞定。
 
-**Resume support:** progress is saved after each download. Kill it anytime — re-running skips already-downloaded files.
+**断点续传：** 每成功下载一个 URL 后保存进度，随时可以中断，重新运行自动跳过已下载的文件。
 
-## Environment Variables
+## 环境变量
 
-| Variable | Description |
-|----------|-------------|
-| `FEISHU_CHROME_PATH` | Custom Chrome executable path |
-| `FEISHU_CHROME_PROFILE` | Custom Chrome profile directory |
+| 变量 | 说明 |
+|------|------|
+| `FEISHU_CHROME_PATH` | 自定义 Chrome 可执行文件路径 |
+| `FEISHU_CHROME_PROFILE` | 自定义 Chrome Profile 目录 |
 
-## Notes
+## 注意事项
 
-- Works with **public** Feishu documents only (no login required)
-- Each sheet tab takes 8–15 seconds to load
-- Chrome profile is isolated from your system profile: `~/Library/Application Support/feishu-sheet-links/chrome-profile` (macOS)
+- 仅支持**公开**飞书文档，无需登录
+- 每个 Sheet 标签页加载约需 8–15 秒
+- Chrome Profile 与系统默认 Profile 隔离：`~/Library/Application Support/feishu-sheet-links/chrome-profile`（macOS）
 
-## How It Works
+## 工作原理
 
-1. Connects to an existing Chrome instance (ports 64023, 9222, 9229) or launches its own
-2. Reads all sheet IDs from `spreadApp.collaborativeSpread._spread.sheetIdToIndexMap`
-3. For each sheet, opens a tab at `?sheet=<id>`, calls `setActiveSheetIndex()` to trigger lazy loading, waits for `sheet._dataModel.contentModel`
-4. Extracts links from both storage formats:
-   - **url-type:** `contentModel.link.idToRef._map` — whole-cell hyperlinks
-   - **mention-type:** `contentModel.segmentModel.table` — inline rich-text links
+1. 优先复用已运行的 Chrome 实例（检测端口 64023、9222、9229），否则自动启动
+2. 从 `spreadApp.collaborativeSpread._spread.sheetIdToIndexMap` 读取所有 Sheet ID
+3. 对每个 Sheet 打开 `?sheet=<id>` 标签页，调用 `setActiveSheetIndex()` 触发懒加载，等待 `sheet._dataModel.contentModel` 填充
+4. 从两种存储格式中提取链接：
+   - **url-type：** `contentModel.link.idToRef._map`（整格超链接）
+   - **mention-type：** `contentModel.segmentModel.table`（富文本内嵌链接）
 
 ## License
 
-[MIT-0](LICENSE) — use freely, no attribution required.
+[MIT-0](LICENSE) — 随意使用，无需署名。
+
+---
+
+**关键词：** 飞书多维表格提取链接 / 飞书表格批量下载 / 飞书知识库导出 Markdown / 飞书文章批量下载 / 飞书爬虫所有Sheet / 飞书懒加载解决方案 / 付费飞书知识库备份 / feishu scraper / feishu link extractor
