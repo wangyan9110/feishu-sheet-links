@@ -1,97 +1,91 @@
 ---
 name: feishu-sheet-links
-description: Extract all hyperlinks from a public Feishu spreadsheet across all sheet tabs, and optionally batch-download the linked articles as Markdown files. Use when user provides a Feishu spreadsheet URL and wants to extract or download its links.
+description: Extract all hyperlinks from a public Feishu spreadsheet across all sheet tabs, and optionally batch-download the linked articles as Markdown files. Use when the user shares a Feishu URL (feishu.cn/wiki or feishu.cn/sheets) and wants to extract links, scrape article titles, collect URLs from a Feishu doc, download content from Feishu, or build a local copy of Feishu articles. Also use when the user says things like "帮我下载飞书的链接", "把飞书表格里的链接提取出来", or "下载飞书文章".
 ---
 
 # feishu-sheet-links
 
-Extract all hyperlinks from a public Feishu spreadsheet across all sheet tabs.
-Standalone skill — no dependency on other skills.
+Extracts all hyperlinks from every sheet tab of a public Feishu spreadsheet, then optionally batch-downloads the linked articles as Markdown files.
 
-## Script Directory
+## Workflow
 
-Base: `.claude/skills/feishu-sheet-links/`
+When invoked, follow these steps:
 
-| File | Purpose |
-|------|---------|
-| `scripts/main.ts` | Step 1: Extract all hyperlinks from spreadsheet → JSON |
-| `scripts/download.ts` | Step 2: Batch download linked articles → markdown files |
-| `scripts/cdp.ts` | CDP utilities (Chrome launch, connection, evaluate) |
+### Step 1 — Get the URL
 
-## Usage
+If the user has already provided a Feishu URL, use it. Otherwise ask:
+> "请提供飞书多维表格的链接（公开可访问的）"
 
-### Step 1 — Extract links
+Confirm the URL looks like `https://*.feishu.cn/wiki/...` or `https://*.feishu.cn/sheets/...`.
 
+### Step 2 — Extract links
+
+Resolve the skill directory:
 ```bash
-SKILL_DIR="/path/to/.claude/skills/feishu-sheet-links"
-npx -y bun ${SKILL_DIR}/scripts/main.ts <spreadsheet-url> [-o output.json]
+SKILL_DIR="$(find ~/.claude/skills /workspace/.claude/skills -maxdepth 1 -name feishu-sheet-links -type d 2>/dev/null | head -1)"
 ```
 
-**Example:**
+Run the extraction script:
 ```bash
-npx -y bun ${SKILL_DIR}/scripts/main.ts \
-  "https://xcngx0f1wik3.feishu.cn/wiki/XJexwR7Zqi2L80kcugtcFIfCnHg?sheet=ce2f5b" \
-  -o feishu-links.json
+npx -y bun "${SKILL_DIR}/scripts/main.ts" "<spreadsheet-url>" -o feishu-links.json
 ```
 
-### Step 2 — Batch download articles
+Each sheet tab takes 8–15 seconds to load — let the user know it may take a moment.
 
-```bash
-npx -y bun ${SKILL_DIR}/scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wait ms]
+### Step 3 — Show a summary
+
+After extraction, show the user a summary:
+- How many sheets were found
+- How many links per sheet (with sheet names)
+- Total link count
+
+Example:
+```
+Found 4 sheets, 127 links total:
+- 1月: 32 links
+- 2月: 28 links
+- 3月: 35 links
+- 4月: 32 links
+
+Saved to: feishu-links.json
 ```
 
-**Example:**
+### Step 4 — Offer to download articles
+
+Ask the user if they want to download the linked articles as Markdown:
+> "是否需要批量下载这些文章为 Markdown 文件？"
+
+If yes, ask for an output directory (default: `./feishu-articles`), then run:
 ```bash
-npx -y bun ${SKILL_DIR}/scripts/download.ts feishu-links.json \
-  -o ./raw/shengcai \
+npx -y bun "${SKILL_DIR}/scripts/download.ts" feishu-links.json \
+  -o <output-dir> \
   -c 5 \
   --max-wait 20000
 ```
 
-**Options:**
+Download supports resume — if interrupted, re-running skips already-downloaded files.
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `<links.json>` | — | Output from Step 1 |
-| `-o <dir>` | `./feishu-articles` | Output directory for markdown files |
-| `-c <n>` | `5` | Concurrent downloads |
-| `--max-wait <ms>` | `20000` | Max page wait time per URL |
+## Error Handling
 
-**Resume support**: Progress is saved to `<output-dir>/.download-progress.json` after each URL. Re-running the same command skips already-downloaded URLs.
+| Situation | Action |
+|-----------|--------|
+| Document is private / requires login | Tell the user — this tool only works with public Feishu docs |
+| Chrome not found | Ask user to install Chrome, or set `FEISHU_CHROME_PATH` |
+| A sheet times out | Warn and continue — other sheets will still be extracted |
+| Zero links found | Confirm the URL is correct and the doc is publicly accessible |
 
 ## How It Works
 
-1. **Reuses existing Chrome if available** — checks ports 64023, 9222, 9229 first.  
-   Falls back to launching a new Chrome instance with its own profile (`feishu-sheet-links/chrome-profile`), isolated from other skills.
-2. Opens the spreadsheet URL in a new tab.
-3. Reads all sheet tab IDs from `spreadApp.collaborativeSpread._spread.sheetIdToIndexMap`.
-4. Opens one tab per remaining sheet to trigger lazy data loading.
-5. Extracts links from two Feishu storage formats:
+1. Reuses an existing Chrome instance if available (ports 64023, 9222, 9229), otherwise launches its own isolated instance
+2. Opens the spreadsheet to discover all sheet IDs from `spreadApp.collaborativeSpread._spread.sheetIdToIndexMap`
+3. For each sheet, opens a dedicated tab at `?sheet=<id>`, calls `setActiveSheetIndex()` to trigger lazy loading, and waits for `sheet._dataModel.contentModel` to populate
+4. Extracts links from two Feishu storage formats:
    - **url-type** — `contentModel.link.idToRef._map` (whole-cell hyperlinks)
    - **mention-type** — `contentModel.segmentModel.table` (inline rich-text links)
-6. Writes `{ "1月": [{text, url}, ...], ... }` JSON and prints a markdown summary.
-
-## Output
-
-```json
-{
-  "1月": [{ "text": "文章标题", "url": "https://my.feishu.cn/wiki/..." }],
-  "2月": [...],
-  "3月": [...],
-  "4月": [...]
-}
-```
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `FEISHU_CHROME_PATH` | Custom Chrome executable |
+| `FEISHU_CHROME_PATH` | Custom Chrome executable path |
 | `FEISHU_CHROME_PROFILE` | Custom Chrome profile directory |
-
-## Notes
-
-- Works with **public/anonymous** Feishu spreadsheets (no login needed)
-- 1月/2月/3月 typically use **url-type** links; 4月+ may use **mention-type**
-- Each tab needs ~8–15 s to load; timeouts are set generously
-- Chrome profile: `~/Library/Application Support/feishu-sheet-links/chrome-profile` (macOS)
