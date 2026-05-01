@@ -2,18 +2,18 @@ English | [中文](README_CN.md)
 
 # feishu-sheet-links
 
-从公开的飞书多维表格中提取所有超链接——覆盖**所有 Sheet 标签页**——并可批量下载链接指向的文章为 Markdown 文件。
+从公开的飞书多维表格中提取所有超链接——**所有 Sheet 标签页，不只是第一个**——并批量下载链接指向的文章为 Markdown 文件。
 
 [![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
-## 为什么做这个
+## 为什么不直接爬取？
 
-飞书多维表格采用懒加载机制：每个 Sheet 的数据模型只有在浏览器中被激活后才会加载。常规爬虫只能抓到第一个 Sheet，其余全部遗漏。
+飞书多维表格的每个 Sheet 只有在浏览器中被激活后才会加载数据模型。任何常规爬虫只能看到第一个 Sheet——其余的在 HTML 里根本不存在。
 
-本工具通过 **Chrome DevTools Protocol（CDP）** 逐一激活每个 Sheet，等待其内部 JavaScript 数据模型加载完成，再从飞书的两种链接格式（`url-type` 和 `mention-type`）中提取超链接。
+feishu-sheet-links 使用 **Chrome DevTools Protocol（CDP）** 逐一激活每个 Sheet，等待其内部 JavaScript 数据模型加载完成，再从飞书的两种链接格式（`url-type` 和 `mention-type`）中提取超链接。
 
-**零 npm 依赖。** 只需要 Bun 运行时和 Chrome 浏览器。
+**不需要 npm install。** 只要有 Bun 和 Chrome，直接运行。
 
 ## 环境要求
 
@@ -23,32 +23,33 @@ English | [中文](README_CN.md)
 ## 快速开始
 
 ```bash
+# 第一步 — 提取所有 Sheet 的链接
 npx -y bun scripts/main.ts "https://your-org.feishu.cn/wiki/..." -o links.json
+
+# 第二步 — 批量下载为 Markdown
 npx -y bun scripts/download.ts links.json -o ./articles
 ```
 
 ## 安装
 
-**作为 Claude Code Skill — 通过 ClawHub：**
+**通过 ClawHub：**
 ```bash
 clawhub install feishu-sheet-links
 ```
 
-**作为 Claude Code Skill — 通过 npx skills：**
+**通过 npx skills：**
 ```bash
 npx skills add wangyan9110/feishu-sheet-links
 ```
 
-**直接克隆运行：**
+**直接克隆：**
 ```bash
 git clone https://github.com/wangyan9110/feishu-sheet-links
-cd feishu-sheet-links
-npx -y bun scripts/main.ts "<url>"
 ```
 
 ## 使用方法
 
-### 提取链接
+### 第一步 — 提取链接
 
 ```bash
 npx -y bun scripts/main.ts <spreadsheet-url> [-o output.json]
@@ -62,7 +63,7 @@ npx -y bun scripts/main.ts <spreadsheet-url> [-o output.json]
 }
 ```
 
-### 批量下载文章
+### 第二步 — 批量下载文章
 
 ```bash
 npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wait ms]
@@ -74,17 +75,7 @@ npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--
 | `-c <n>` | `5` | 并发下载数 |
 | `--max-wait <ms>` | `20000` | 每个 URL 的最长等待时间 |
 
-支持断点续传：每成功下载一个 URL 后保存进度，重新运行自动跳过已下载的文件。
-
-### 在 Claude Code 中使用
-
-安装为 Skill 后，直接调用：
-
-```
-/feishu-sheet-links https://your-org.feishu.cn/wiki/...
-```
-
-Claude 会提取链接、显示汇总，并询问是否批量下载为 Markdown。
+**断点续传：** 每成功下载一个 URL 后保存进度。随时可以中断，重新运行自动跳过已下载的文件。
 
 ## 工作原理
 

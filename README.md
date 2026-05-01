@@ -2,18 +2,18 @@
 
 # feishu-sheet-links
 
-Extract all hyperlinks from a public Feishu spreadsheet — across **all sheet tabs** — and optionally batch-download the linked articles as Markdown files.
+Extract all hyperlinks from a public Feishu spreadsheet — **every sheet tab, not just the first** — and batch-download the linked articles as Markdown files.
 
 [![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
-## Why This Exists
+## Why Not Just Scrape It Yourself?
 
-Feishu spreadsheets lazy-load each sheet's data model only when that tab is activated in the browser. Standard scraping misses every sheet except the first one.
+Feishu spreadsheets lazy-load each sheet's data model only when that tab is activated in a real browser. Any standard scraper only sees the first sheet — the rest simply don't exist in the HTML.
 
-This tool uses **Chrome DevTools Protocol (CDP)** to activate each sheet programmatically, wait for its internal JavaScript model to populate, then extract links from both Feishu storage formats (`url-type` and `mention-type`).
+feishu-sheet-links uses **Chrome DevTools Protocol (CDP)** to activate each sheet programmatically and wait for its internal JavaScript model to populate, then extracts links from both Feishu storage formats (`url-type` and `mention-type`).
 
-**Zero npm dependencies.** Requires only Bun and Chrome.
+**No npm install.** Drop in Bun and Chrome and you're done.
 
 ## Requirements
 
@@ -23,32 +23,33 @@ This tool uses **Chrome DevTools Protocol (CDP)** to activate each sheet program
 ## Quick Start
 
 ```bash
+# Step 1 — extract links from all sheets
 npx -y bun scripts/main.ts "https://your-org.feishu.cn/wiki/..." -o links.json
+
+# Step 2 — batch download as Markdown
 npx -y bun scripts/download.ts links.json -o ./articles
 ```
 
 ## Installation
 
-**As a Claude Code skill — via ClawHub:**
+**Via ClawHub:**
 ```bash
 clawhub install feishu-sheet-links
 ```
 
-**As a Claude Code skill — via npx skills:**
+**Via npx skills:**
 ```bash
 npx skills add wangyan9110/feishu-sheet-links
 ```
 
-**Clone and run directly:**
+**Clone directly:**
 ```bash
 git clone https://github.com/wangyan9110/feishu-sheet-links
-cd feishu-sheet-links
-npx -y bun scripts/main.ts "<url>"
 ```
 
 ## Usage
 
-### Extract links
+### Step 1 — Extract links
 
 ```bash
 npx -y bun scripts/main.ts <spreadsheet-url> [-o output.json]
@@ -62,7 +63,7 @@ Output:
 }
 ```
 
-### Batch download articles
+### Step 2 — Batch download articles
 
 ```bash
 npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wait ms]
@@ -74,17 +75,7 @@ npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--
 | `-c <n>` | `5` | Concurrent downloads |
 | `--max-wait <ms>` | `20000` | Per-URL timeout |
 
-Resume support: progress is saved after each URL, re-running skips already-downloaded files.
-
-### Use in Claude Code
-
-After installing as a skill, invoke:
-
-```
-/feishu-sheet-links https://your-org.feishu.cn/wiki/...
-```
-
-Claude will extract links, show a summary, then offer to batch-download as Markdown.
+**Resume support:** progress is saved after each successful download. Kill it anytime — re-running picks up where it left off.
 
 ## How It Works
 
