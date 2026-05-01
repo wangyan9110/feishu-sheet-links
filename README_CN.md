@@ -1,3 +1,5 @@
+English | [中文](README_CN.md)
+
 # feishu-sheet-links
 
 从公开的飞书多维表格中提取所有超链接——覆盖**所有 Sheet 标签页**——并可批量下载链接指向的文章，转为 Markdown 文件。

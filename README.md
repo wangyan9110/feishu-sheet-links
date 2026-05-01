@@ -1,3 +1,5 @@
+[中文](README_CN.md) | English
+
 # feishu-sheet-links
 
 Extract all hyperlinks from a public Feishu spreadsheet — across **all sheet tabs** — and optionally batch-download the linked articles as Markdown files.
