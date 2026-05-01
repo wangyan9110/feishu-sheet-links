@@ -2,29 +2,29 @@ English | [中文](README_CN.md)
 
 # feishu-sheet-links
 
-不用再一个一个点标签页了。一次提取所有 Sheet 里的全部链接，几分钟内批量下载为 Markdown。
+**飞书多维表格链接提取 & 批量下载工具。** 不用再一个一个点标签页——一次提取所有 Sheet 里的全部链接，几分钟内批量下载为 Markdown 文件。
 
 [![ClawHub](https://img.shields.io/badge/ClawHub-feishu--sheet--links-blue)](https://clawhub.ai/wangyan9110/feishu-sheet-links)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
-## 问题所在
+## 为什么飞书表格链接没法直接爬？
 
-飞书多维表格侧边栏显示着所有 Sheet，但每个 Sheet 的数据只有在你点击标签页时才会加载。抓 HTML、跑爬虫、调 API——你只能拿到第一个 Sheet，其余的根本不存在。
+飞书多维表格的每个 Sheet 采用懒加载：数据只有在浏览器中点击对应标签页后才会加载。抓 HTML、跑爬虫、调飞书 API——你只能拿到第一个 Sheet，其余的根本不存在。
 
-feishu-sheet-links 使用 **Chrome DevTools Protocol（CDP）** 逐一激活每个 Sheet，等待数据加载完成，再从飞书的两种链接格式（`url-type` 和 `mention-type`）中提取超链接。
+feishu-sheet-links 使用 **Chrome DevTools Protocol（CDP）** 逐一激活每个 Sheet，等待数据加载完成，再从飞书的两种链接格式（`url-type` 和 `mention-type`）中提取全部超链接。
 
-**不需要 npm install。** 只要有 Bun 和 Chrome。
+**不需要 npm install。** 只要有 Bun 和 Chrome，直接运行。
 
 ## 适合谁用
 
-你购买了一个付费知识库，内容主把精华文章的链接整理在飞书表格里。你想把这些内容全部下载到本地。
+你购买了一个付费知识库，内容主把精华文章的链接整理在飞书表格里。你想把这些文章全部下载到本地，做成自己的知识库。
 
-更广泛地说：只要有人用飞书表格存链接——无论什么结构——这个工具就能帮你把所有 Sheet 里的链接全部提取并下载。
+更广泛地说：只要有人用飞书表格存链接——无论什么结构——这个工具就能帮你把所有 Sheet 里的链接全部提取并批量下载。
 
-- **归档付费知识库** — 在订阅到期或文章设为私密前，把内容全部存到本地
-- **搭建本地知识库** — 批量下载为 Markdown，导入 LLM 或 RAG 管道
-- **内容迁移** — 一次性提取全部链接，不用逐篇手动打开
-- **备份资料合集** — 任何用飞书表格整理链接的场景
+- **归档付费飞书知识库** — 在订阅到期或文章设为私密前，把内容全部存到本地
+- **搭建本地 AI 知识库** — 批量下载为 Markdown，导入 LLM 或 RAG 管道
+- **飞书文章批量导出** — 一次性提取全部链接，不用逐篇手动打开
+- **备份飞书资料合集** — 任何用飞书表格整理文章链接的场景
 
 ## 环境要求
 
@@ -51,10 +51,10 @@ git clone https://github.com/wangyan9110/feishu-sheet-links
 ## 快速开始
 
 ```bash
-# 第一步 — 提取所有 Sheet 的链接
+# 第一步 — 提取飞书表格所有 Sheet 的链接
 npx -y bun scripts/main.ts "https://your-org.feishu.cn/wiki/..." -o links.json
 
-# 第二步 — 批量下载为 Markdown
+# 第二步 — 批量下载文章为 Markdown
 npx -y bun scripts/download.ts links.json -o ./articles
 ```
 
@@ -72,7 +72,7 @@ Saved to: links.json
 
 ## 使用方法
 
-### 第一步 — 提取链接
+### 第一步 — 提取飞书表格链接
 
 ```bash
 npx -y bun scripts/main.ts <spreadsheet-url> [-o output.json]
@@ -86,7 +86,7 @@ npx -y bun scripts/main.ts <spreadsheet-url> [-o output.json]
 }
 ```
 
-### 第二步 — 批量下载文章
+### 第二步 — 批量下载飞书文章
 
 ```bash
 npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--max-wait ms]
@@ -127,3 +127,7 @@ npx -y bun scripts/download.ts <links.json> [-o output-dir] [-c concurrency] [--
 ## License
 
 [MIT-0](LICENSE) — 随意使用，无需署名。
+
+---
+
+**关键词：** 飞书多维表格提取链接 / 飞书表格批量下载 / 飞书知识库导出 Markdown / 飞书文章批量下载 / 飞书爬虫所有Sheet / 飞书懒加载解决方案 / 付费飞书知识库备份 / feishu scraper / feishu link extractor
