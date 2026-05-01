@@ -15,7 +15,23 @@ Feishu spreadsheets lazy-load each sheet's data model only when that tab is acti
 
 **Zero npm dependencies.** No `npm install` needed — only Bun and Chrome.
 
-## Quick Start
+## Use as a Claude Code Skill
+
+Copy the entire repo into your Claude Code skills directory:
+
+```bash
+cp -r feishu-sheet-links ~/.claude/skills/
+```
+
+Then invoke it in Claude Code:
+
+```
+/feishu-sheet-links https://your-feishu-doc.feishu.cn/wiki/...
+```
+
+See [SKILL.md](SKILL.md) for the full skill interface.
+
+## Use as Standalone Scripts
 
 **Step 1 — Extract links from all sheets:**
 

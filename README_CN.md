@@ -17,7 +17,23 @@ English | [中文](README_CN.md)
 - [Bun](https://bun.sh) 运行时
 - Google Chrome 或 Chromium
 
-## 快速开始
+## 作为 Claude Code Skill 使用
+
+将整个仓库复制到 Claude Code 的 skills 目录：
+
+```bash
+cp -r feishu-sheet-links ~/.claude/skills/
+```
+
+然后在 Claude Code 中调用：
+
+```
+/feishu-sheet-links https://your-feishu-doc.feishu.cn/wiki/...
+```
+
+完整的 Skill 接口说明见 [SKILL.md](SKILL.md)。
+
+## 作为独立脚本使用
 
 **第一步 — 提取所有 Sheet 的链接：**
 
