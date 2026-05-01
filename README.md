@@ -17,12 +17,14 @@ feishu-sheet-links uses **Chrome DevTools Protocol (CDP)** to activate every she
 
 ## Who Is This For
 
-Anyone who uses a Feishu spreadsheet as a link index — article libraries, content calendars, research collections — and needs to get those links out.
+You paid for a knowledge subscription. The curator shared hundreds of article links in a Feishu spreadsheet. You want it all on your local machine.
 
-- **Build a local knowledge base** — download hundreds of articles as Markdown, feed to an LLM or RAG pipeline
-- **Backup content** — archive before articles disappear or go private
-- **Migrate to another platform** — extract everything in one pass
-- **Content operations** — full export across all sheets, not just the first tab
+More broadly: if someone is using a Feishu spreadsheet to store links — any links, any structure — this tool downloads them all, across every sheet tab.
+
+- **Archive a paid knowledge base** — download everything before your subscription expires or articles go private
+- **Build a local knowledge base** — pull articles as Markdown, feed to an LLM or RAG pipeline
+- **Migrate content** — extract everything in one pass instead of opening each link manually
+- **Back up research collections** — any Feishu spreadsheet used as a link library
 
 ## Requirements
 
